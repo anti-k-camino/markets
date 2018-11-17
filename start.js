@@ -4,7 +4,7 @@ require('dotenv').config({ path: 'variables.env' });
 
 mongoose.connect(process.env.DATABASE);
 mongoose.Promise = global.Promise;
-mongoose.connection.on('error', (err) =>  console.error(`Error  → ${err.message}`);
+mongoose.connection.on('error', (err) =>  console.error(`Error  → ${err.message}`));
 
 const app = require('./app');
 app.set('port', process.env.PORT || 7777);
