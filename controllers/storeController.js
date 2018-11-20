@@ -1,11 +1,34 @@
 'use strict';
 const mongoose = require('mongoose');
-const Store = mongoose.model('Store'); // that comes from using 'singleton' by mongoose
-// while loading model (it has to be loaded just once, in start.js in our case)
+const Store = mongoose.model('Store'); // singleton concept by mongoose(models are loaded only once)
+const multer = require('multer'); // handling "multipart/form-data"
+const jimp = require('jimp');
+const uuid = require('uuid');
+const multerOptions = {
+  storage: multer.memoryStorage(), // uploads should be resized before saving to disk
+  fileFilter(req, file, next) {
+    const isPhoto = file.mimetype.startsWith('image/');
+    if (isPhoto) next(null, true); // null stands for no errors, true - a value that should be passed next
+    else next({ message: 'That type is not allowed!' }, false);
+  }
+};
 
 exports.homePage = (req, res) => res.render('index');
 
 exports.addStore = (req, res) => res.render('editStore', { title: 'Add Store' });
+
+exports.upload = multer(multerOptions).single('photo');
+
+exports.resize = async (req, res, next) => {
+  // check if there is no file to resize
+  if (!req.file) return next(); // req.file property was set by multer middleware
+  const extension = req.file.mimetype.split('/')[1];
+  req.body.photo = `${uuid.v4()}.${extension}`;
+  const photo = await jimp.read(req.file.buffer);
+  await photo.resize(800, jimp.AUTO);
+  await photo.write(`./public/uploads/${req.body.photo}`);
+  next(); 
+};
 
 exports.createStore = async (req, res) => {
   const store = await (new Store(req.body)).save();
@@ -24,10 +47,15 @@ exports.editStore = async (req, res) => {
 };
 
 exports.updateStore = async (req, res) => {
+  // when updating the address the 'Point' type should be set implicitly
+  // if (req.body.location) {
+    req.body.location.type = 'Point';
+  // }
+  // find && update
   const store = await Store.findOneAndUpdate({ _id: req.params.id }, req.body, {
     new: true, // returns the new store instead of the old one
     runValidators: true // force model to run validators on updating not only creating
-  }).exec();
+  }).exec(); // exec is called to awake all validators
   req.flash('success', `${store.name} updated! <a href="/stores/${store.slug}">View Store</a>`);
   res.redirect(`/stores/${store._id}/edit`);
 };
