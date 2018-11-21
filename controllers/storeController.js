@@ -43,7 +43,7 @@ exports.getStores = async (req, res) => {
 
 exports.editStore = async (req, res) => {
   const store = await Store.findOne({ _id: req.params.id });
-  res.render('editStore', { title: `Edit ${store.name}`, store })
+  res.render('editStore', { title: `Edit ${store.name}`, store });
 };
 
 exports.updateStore = async (req, res) => {
@@ -58,6 +58,18 @@ exports.updateStore = async (req, res) => {
   }).exec(); // exec is called to awake all validators
   req.flash('success', `${store.name} updated! <a href="/stores/${store.slug}">View Store</a>`);
   res.redirect(`/stores/${store._id}/edit`);
+};
+
+exports.getStoreBySlug = async (req, res, next) => {
+  const store = await Store.findOne({ slug: req.params.slug });
+  if (!store) return next(); // to show 404 if no store was found.
+  res.render('store', { title: `${store.name}`, store});
+};
+
+exports.getStoresByTags = async (req, res) => {
+  const tags = await Store.getTagsList();
+  const tag = req.params.tag;
+  res.render('tags', {tags, title: 'Tags', tag});
 };
 
 ///////////// Composition ////////////
