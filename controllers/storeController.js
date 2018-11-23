@@ -48,9 +48,7 @@ exports.editStore = async (req, res) => {
 
 exports.updateStore = async (req, res) => {
   // when updating the address the 'Point' type should be set implicitly
-  // if (req.body.location) {
-    req.body.location.type = 'Point';
-  // }
+  req.body.location.type = 'Point';
   // find && update
   const store = await Store.findOneAndUpdate({ _id: req.params.id }, req.body, {
     new: true, // returns the new store instead of the old one
@@ -63,13 +61,19 @@ exports.updateStore = async (req, res) => {
 exports.getStoreBySlug = async (req, res, next) => {
   const store = await Store.findOne({ slug: req.params.slug });
   if (!store) return next(); // to show 404 if no store was found.
-  res.render('store', { title: `${store.name}`, store});
+  res.render('store', { title: `${store.name}`, store });
 };
 
 exports.getStoresByTags = async (req, res) => {
-  const tags = await Store.getTagsList();
+  // const tags = await Store.getTagsList();
   const tag = req.params.tag;
-  res.render('tags', {tags, title: 'Tags', tag});
+  const tagQuery = tag || { $exists: true }; // a tag or any store that has a tag property
+  const tagsPromise = Store.getTagsList();
+  const storesPromise = Store.find({ tags: tagQuery });
+  // this will accomplish both requests to db async-way
+  // (it will take time a longest query will fullfil)
+  const [tags, stores] = await Promise.all([tagsPromise, storesPromise]);
+  res.render('tags', { tags, title: 'Tags', tag, stores });
 };
 
 ///////////// Composition ////////////
@@ -84,28 +88,3 @@ exports.getStoresByTags = async (req, res) => {
 // This should be used in a middleware chain(app.js)
 // ( in index.js catchErrors wraps createStore ).
 ////////////////////////////////////////
-
-// exports.createStore = (req, res) => {
-  // const store = new Store(req.body);
-
-    // res.json(req.body); we receive store object submited by a form 
-    // than it goes through bodyParser (a middleware in app.js) to get POST's body
-
-    // store.save((err, store) => { // that is the old way of handling asyc operations 
-    //   if (err) throw err;        // by callbacks
-    //   console.log('Saved!');
-    //   res.redirect('/');
-    // });
-
-    // .save()
-    // .then(async store => {
-    //   const stores = await Store.find(); // to list all the stores
-    //   res.json(stores);
-    // })
-    // .catch(err => { 
-    //   throw Error(err);
-    // });
-
-    // console.log("It worked");
-
-// };
