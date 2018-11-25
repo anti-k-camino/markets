@@ -2,7 +2,8 @@
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-// Check if there is still a bug with mongoose(was once stated in start.js)
+// TODO !
+// Check if there is still a bug with mongoose(Promise was once stated in start.js)
 mongoose.Promise = global.Promise;
 const md5 = require('md5');
 const validator = require('validator');
@@ -22,7 +23,9 @@ const userSchema = new Schema({
     type: String,
     required: 'Please Supply A Name',
     trim: true
-  }
+  },
+  resetPasswordToken: String,
+  resetPasswordExpires: Date
 });
 
 userSchema.virtual('gravatar').get(function () {
