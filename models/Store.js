@@ -41,6 +41,12 @@ const storeSchema = new mongoose.Schema({
   }
 });
 
+// Indexes Defined
+storeSchema.index({
+  name: 'text',
+  description: 'text'
+});
+
 storeSchema.pre('save', async function(next) {
 	if (!this.isModified('name')) return next();
 	this.slug = slugs(this.name);

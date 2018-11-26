@@ -29,7 +29,7 @@ const uglify = new webpack.optimize.UglifyJsPlugin({
 
 const config = {
   entry: {
-    App: './public/javascripts/delicious-app.js'
+    App: './public/javascripts/markets-app.js'
   },
   devtool: 'source-map',
   output: {

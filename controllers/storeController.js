@@ -83,6 +83,22 @@ exports.getStoresByTags = async (req, res) => {
   res.render('tags', { tags, title: 'Tags', tag, stores });
 };
 
+exports.searchStores = async (req, res) => {
+  const stores = await Store
+  .find({
+    $text: {
+      $search: req.query.q
+    }
+  }, {
+    score: { $meta: 'textScore' }
+  })
+  .sort({
+    score: { $meta: 'textScore' }
+  }); // .limit(5) 
+
+  res.json(stores);
+};
+
 ///////////// Composition ////////////
 // In order to handle errors on of the ways to avoid try-catch block
 // is to wrap async function into another function
