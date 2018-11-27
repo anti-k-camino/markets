@@ -10,7 +10,9 @@ function ajaxHeart(e) {
   .then(res => {
     const isHearted = this.heart.classList.toggle('heart__button--hearted');
     $('.heart-count').textContent = res.data.length;
-    // if (isHearted) this.heart.classList.add('heart__button--float');
+    if (isHearted) {
+     return this.heart.classList.add('heart__button--float');
+    }
   })
   .catch(e => console.error(e));
 };
