@@ -39,7 +39,7 @@ exports.createStore = async (req, res) => {
 };
 
 exports.getStores = async (req, res) => {
-  const stores = await Store.find();
+  const stores = await Store.find(); //.populate('reviews');
   res.render('stores', { title: 'Stores', stores });
 };
 
@@ -120,6 +120,11 @@ exports.getHearted = async (req, res) => {
   res.render('stores', { title: 'Hearted', stores });
 };
 
+exports.getTopStores = async (req, res) => {
+  const stores = await Store.getTopStores();
+  res.render('topStores', { stores, title: 'Top Stores' });
+};
+
 ///////////// Composition ////////////
 // In order to handle errors on of the ways to avoid try-catch block
 // is to wrap async function into another function
@@ -129,6 +134,4 @@ exports.getHearted = async (req, res) => {
 //     return fn(req, res, next).catch(next);
 //   };
 // };
-// This should be used in a middleware chain(app.js)
-// ( in index.js catchErrors wraps createStore ).
 ////////////////////////////////////////
