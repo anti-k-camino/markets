@@ -39,6 +39,9 @@ const storeSchema = new mongoose.Schema({
     type: mongoose.Schema.ObjectId,
     ref: 'User'
   }
+}, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
 });
 
 // Indexes Defined
@@ -46,6 +49,8 @@ storeSchema.index({
   name: 'text',
   description: 'text'
 });
+// geolocation(GEOSPATIAL)
+// storeSchema.index({ location: '2dsphere' });
 
 storeSchema.pre('save', async function(next) {
 	if (!this.isModified('name')) return next();
@@ -63,5 +68,11 @@ storeSchema.statics.getTagsList = function() {
     { $sort: { count: -1 }}
   ]);
 };
+
+storeSchema.virtual('reviews', {
+  ref: 'Review',
+  localField: '_id',
+  foreignField: 'store'
+});
 
 module.exports = mongoose.model('Store', storeSchema);
