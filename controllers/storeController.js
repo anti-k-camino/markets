@@ -1,7 +1,8 @@
 'use strict';
 const mongoose = require('mongoose');
-const Store = mongoose.model('Store'); // singleton concept by mongoose(models are loaded only once)
-const multer = require('multer'); // handling "multipart/form-data"
+const Store = mongoose.model('Store');
+const User = mongoose.model('User');
+const multer = require('multer');
 const jimp = require('jimp');
 const uuid = require('uuid');
 const multerOptions = {
@@ -97,6 +98,21 @@ exports.searchStores = async (req, res) => {
   }); // .limit(5) 
 
   res.json(stores);
+};
+
+// exports.mapStores = (req, res) => {
+//   res.json({it: 'worked'});
+// };
+
+exports.heartStore = async (req, res) => {
+  const hearts = req.user.hearts.map(obj => obj.toString());
+  const operator = hearts.includes(req.params.id) ? '$pull' : '$addToSet';
+  const user = await User
+  .findByIdAndUpdate(req.user._id,
+    {[operator]: { hearts: req.params.id }},
+    { new: true }
+  );
+  res.json(user.hearts);
 };
 
 ///////////// Composition ////////////
